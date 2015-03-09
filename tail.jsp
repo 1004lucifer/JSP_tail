@@ -145,7 +145,7 @@
                                 endPoint = data.endPoint == false ? 0 : data.endPoint;
                                 logdata = decodeURIComponent(data.log);
                                 if (grep != false) {
-                                    logdata = logdata.match(pattern).join();
+                                    logdata = logdata.match(pattern).join('');
                                 }
                                 if (grepV != false) {
                                     logdata = logdata.replace(patternV, '');
