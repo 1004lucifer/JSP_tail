@@ -41,7 +41,7 @@
 
             String str;
             while ((str = file.readLine()) != null) {
-                log.append(new String(str.getBytes("ISO-8859-1"),"UTF-8"));
+                log.append(str);
                 log.append("\n");
                 endPoint = file.getFilePointer();
                 file.seek(endPoint);
@@ -57,7 +57,7 @@
             try {file.close();} catch (Exception e) {}
         }
 
-        out.print("{\"endPoint\":\"" + endPoint + "\", \"log\":\"" + URLEncoder.encode(log.toString(), "UTF-8").replaceAll("\\+", "%20") + "\"}");
+        out.print("{\"endPoint\":\"" + endPoint + "\", \"log\":\"" + URLEncoder.encode(new String(str.getBytes("ISO-8859-1"),"UTF-8"), "UTF-8").replaceAll("\\+", "%20") + "\"}");
 
     } else {
 
