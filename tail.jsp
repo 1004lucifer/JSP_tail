@@ -152,9 +152,10 @@
                                 }
                                 consoleLog.val(consoleLog.val() + logdata);
                                 consoleLog.scrollTop(consoleLog.prop('scrollHeight'));
+
+                                setTimeout(requestLog, 1000);
                             }
                         });
-                        setTimeout(requestLog, 1000);
                     }
                 }
                 requestLog();
