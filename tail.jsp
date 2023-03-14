@@ -13,7 +13,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <%
-    String logPath = "/app/vmms/tomcat/logs/";
+    String logPath = "/Users/btb/test/jsp/tail/";
 
     String fileName = request.getParameter("log_filename") == null ? "" : request.getParameter("log_filename");
 
