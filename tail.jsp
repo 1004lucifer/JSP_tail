@@ -12,7 +12,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-<%
+<%    
     String logPath = "/Users/btb/test/jsp/tail/";
 
     String fileName = request.getParameter("log_filename") == null ? "" : request.getParameter("log_filename");
@@ -29,6 +29,7 @@
 
         RandomAccessFile file = null;
 
+        String str = "";
         try {
             file = new RandomAccessFile(fileName, "r");
             endPoint = file.length();
@@ -38,8 +39,7 @@
                             0 : endPoint - 2000;
 
             file.seek(startPoint);
-
-            String str;
+            
             while ((str = file.readLine()) != null) {
                 log.append(str);
                 log.append("\n");
