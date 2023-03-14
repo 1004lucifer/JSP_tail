@@ -12,8 +12,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-<%    
-    String logPath = "/Users/btb/test/jsp/tail/";
+<%
+    String logPath = "/app/vmms/tomcat/logs/";
 
     String fileName = request.getParameter("log_filename") == null ? "" : request.getParameter("log_filename");
 
@@ -29,17 +29,17 @@
 
         RandomAccessFile file = null;
 
-        String str = "";
         try {
             file = new RandomAccessFile(fileName, "r");
             endPoint = file.length();
 
             startPoint = preEndPoint > 0 ?
-                            preEndPoint : endPoint < 2000 ?
-                            0 : endPoint - 2000;
+                    preEndPoint : endPoint < 2000 ?
+                    0 : endPoint - 2000;
 
             file.seek(startPoint);
-            
+
+            String str;
             while ((str = file.readLine()) != null) {
                 log.append(str);
                 log.append("\n");
@@ -57,7 +57,7 @@
             try {file.close();} catch (Exception e) {}
         }
 
-        out.print("{\"endPoint\":\"" + endPoint + "\", \"log\":\"" + URLEncoder.encode(new String(str.getBytes("ISO-8859-1"),"UTF-8"), "UTF-8").replaceAll("\\+", "%20") + "\"}");
+        out.print("{\"endPoint\":\"" + endPoint + "\", \"log\":\"" + URLEncoder.encode(new String(log.toString().getBytes("ISO-8859-1"),"UTF-8"), "UTF-8").replaceAll("\\+", "%20") + "\"}");
 
     } else {
 
@@ -85,94 +85,94 @@
     <title></title>
     <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
     <style type="text/css">
-        * {
-            margin: 0;
-            padding: 0;
-        }
-        #header {
-            position: fixed;
-            top: 0;
-            left: 50px;
-            width: 100%;
-            height: 10%;
-        }
-        #console {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 90%;
-            background-color: black;
-            color:white;
-            font-size: 15px;
-        }
-        #runningFlag {
-            color: red;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      #header {
+        position: fixed;
+        top: 0;
+        left: 50px;
+        width: 100%;
+        height: 10%;
+      }
+      #console {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 90%;
+        background-color: black;
+        color:white;
+        font-size: 15px;
+      }
+      #runningFlag {
+        color: red;
+      }
     </style>
     <script type="text/javascript">
-        var endPoint = 0;
-        var tailFlag = false;
-        var fileName;
-        var consoleLog;
-        var grep;
-        var grepV;
-        var pattern;
-        var patternV;
-        var runningFlag;
-        var match;
-        $(document).ready(function() {
-            consoleLog = $('#console');
-            runningFlag = $('#runningFlag');
+      var endPoint = 0;
+      var tailFlag = false;
+      var fileName;
+      var consoleLog;
+      var grep;
+      var grepV;
+      var pattern;
+      var patternV;
+      var runningFlag;
+      var match;
+      $(document).ready(function() {
+        consoleLog = $('#console');
+        runningFlag = $('#runningFlag');
 
-            function startTail() {
-                runningFlag.html('Running');
-                fileName = $('#fileName').val();
-                grep = $.trim($('#grep').val());
-                grepV = $.trim($('#grepV').val());
-                pattern = new RegExp('.*'+grep+'.*\\n', 'g');
-                patternV = new RegExp('.*'+grepV+'.*\\n', 'g');
-                function requestLog() {
-                    if (tailFlag) {
-                        $.ajax({
-                            type : 'POST',
-                            url : 'tail.jsp',   // #### Caution: The name of the source file
-                            dataType : 'json',
-                            data : {
-                                'log_filename' : fileName,
-                                'preEndPoint' : endPoint
+        function startTail() {
+          runningFlag.html('Running');
+          fileName = $('#fileName').val();
+          grep = $.trim($('#grep').val());
+          grepV = $.trim($('#grepV').val());
+          pattern = new RegExp('.*'+grep+'.*\\n', 'g');
+          patternV = new RegExp('.*'+grepV+'.*\\n', 'g');
+          function requestLog() {
+            if (tailFlag) {
+              $.ajax({
+                type : 'POST',
+                url : 'tail.jsp',   // #### Caution: The name of the source file
+                dataType : 'json',
+                data : {
+                  'log_filename' : fileName,
+                  'preEndPoint' : endPoint
 
-                            },
-                            success : function(data) {
-                                endPoint = data.endPoint == false ? 0 : data.endPoint;
-                                logdata = decodeURIComponent(data.log);
-                                if (grep != false) {
-                                    match = logdata.match(pattern);
-                                    logdata = match ? match.join('') : '';
-                                }
-                                if (grepV != false) {
-                                    logdata = logdata.replace(patternV, '');
-                                }
-                                consoleLog.val(consoleLog.val() + logdata);
-                                consoleLog.scrollTop(consoleLog.prop('scrollHeight'));
+                },
+                success : function(data) {
+                  endPoint = data.endPoint == false ? 0 : data.endPoint;
+                  logdata = decodeURIComponent(data.log);
+                  if (grep != false) {
+                    match = logdata.match(pattern);
+                    logdata = match ? match.join('') : '';
+                  }
+                  if (grepV != false) {
+                    logdata = logdata.replace(patternV, '');
+                  }
+                  consoleLog.val(consoleLog.val() + logdata);
+                  consoleLog.scrollTop(consoleLog.prop('scrollHeight'));
 
-                                setTimeout(requestLog, 1000);
-                            }
-                        });
-                    }
+                  setTimeout(requestLog, 1000);
                 }
-                requestLog();
+              });
             }
-            $('#startTail').on('click', function() {tailFlag = true; startTail();});
-            $('#stopTail').on('click', function() {
-                tailFlag = false;
-                runningFlag.html('Stop');
-            });
-            $('#fileName').change(function() {
-                tailFlag = false;
-                endPoint = 0;
-                runningFlag.html('Stop');
-            });
+          }
+          requestLog();
+        }
+        $('#startTail').on('click', function() {tailFlag = true; startTail();});
+        $('#stopTail').on('click', function() {
+          tailFlag = false;
+          runningFlag.html('Stop');
         });
+        $('#fileName').change(function() {
+          tailFlag = false;
+          endPoint = 0;
+          runningFlag.html('Stop');
+        });
+      });
     </script>
 </head>
 <body>
@@ -180,17 +180,19 @@
     <h2>Log Tail</h2>
     tail -f
     <select id="fileName">
-<%  for (String file : fileList) {  %>
+        <%  for (String file : fileList) {  %>
         <option value="<%=file%>"><%=file%></option>
-<%  }   %>
+        <%  }   %>
     </select>
     | grep <input id="grep" type="text" />
     | grep -v <input id="grepV" type="text" />
 
-    <br/>
+
+
     <input id="startTail" type="button" value="startTail" />&nbsp;&nbsp;&nbsp;
     <input id="stopTail" type="button" value="stopTail" />&nbsp;&nbsp;&nbsp;
-    <span id="runningFlag">Stop</span><br/>
+    <span id="runningFlag">Stop</span>
+
 
 </div>
 <textarea id="console"></textarea>
